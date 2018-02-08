@@ -260,3 +260,75 @@ lm_eqn = function(df){
   out[which(is.na(out))] <- els[which(is.na(out))]
   out
 }
+
+#Takes a SNP vector and converts to 0,1,2 coding
+#sets major to 0 (most frequently found basepair), minor to 2 (second most frequently found bp), 
+#het to 1 (e.g. K, M, R, S, W, Y), anything else to NA ##
+`recode` <- function(x){
+  x <- as.character(x)
+  freqs <- names(sort(table(x[x %in% c("A","G","C","T")]),decreasing=TRUE))
+  major <- freqs[1]
+  if(length(freqs)>1){
+    minor <- freqs[2]
+  }else{
+    minor <- "np"
+  }
+  
+  x[which(x==major)] <-0
+  x[which(x==minor)] <-2
+  x[which(x %in% c("K","M","R","S","W","Y"))] <- 1
+  x[which(!(x==1|x==0|x==2))]   <- NA
+  #x[which(!(x==2|x==0))]   <- NA
+  #x[which(x=="N")] <- NA
+  return(x)
+}
+
+#Take a data.table genotype file and call `recode` to convert to 0,1,2
+#Expects rows are SNPs, doesn't have any metadata columns
+`recodeGenoTable` <- function(genoTable){
+  require(data.table)
+  genoTable[, (names(genoTable)) := as.list(recode(.SD)), by=1:nrow(genoTable)]
+  return(genoTable)
+}
+
+#Takes a recoded (0,1,2) data.table and returns a vector of fraction of het SNPs for each row
+#Calculates fraction of called SNPs that were called as heterozygous (value of 1)
+#Doesn't include NA calls in calculation
+#
+`calcHet` <- function(genoTable) {
+  hetVec <- function(x) {
+    results <- numeric(1)
+    x <- as.numeric(x)
+    results[1] <- length(x[which(x==1)])/length(x[!(is.na(x))])
+    results
+  }
+  hetResult <- genoTable[,as.list(hetVec(.SD)),by=1:nrow(genoTable)]
+  hetResult[, nrow := NULL]
+  setnames(hetResult,c("V1"),c("FracHet"))
+  return(hetResult)
+}
+
+#Takes a recoded (0,1,2) data.table and returns a two column data.table of
+#num missing and minor allele frequency ((minor alelle)/total)
+#FracMissing is number of NA values/number of lines
+#MAF is (number of minor allele + 0.5 the number of het allele)/(number of nonNA alleles)
+`calcMAF` <- function(genoTable) {
+  mafVect <- function(x){
+    results <- numeric(2)
+    #data.frame(numMissing=length(which(is.na(x))),maf=length(x[!is.na(x)]))
+    x <- as.numeric(x)
+    results[1]<-length(which(is.na(x)))/length(x)
+    #results[2]<-(length(x[which(x==1)])+0.5*length(x[which(x == 0.5)]))/length(x[!is.na(x)])
+    results[2]<-(length(x[which(x==2)])+0.5*length(x[which(x == 1)]))/length(x[!is.na(x)])
+    results
+  }
+  mafTable <- genoTable[,as.list(mafVect(.SD)),by=1:nrow(genoTable)]
+  mafTable[, nrow := NULL]
+  setnames(mafTable,c("V1","V2"),c("FracMissing","MAF"))
+  return(mafTable)
+}
+
+#Takes a recoded (0,1,2) data.table and returns a single row data.table of length ncol with fraction of missing calls for each line
+`missingByLine` <- function(genoTable) {
+  return(genoTable[,lapply(.SD,function(x) length(which(is.na(x)))/length(x))])
+}
