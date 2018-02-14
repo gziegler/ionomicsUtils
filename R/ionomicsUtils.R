@@ -264,7 +264,10 @@ lm_eqn = function(df){
 #Takes a SNP vector and converts to 0,1,2 coding
 #sets major to 0 (most frequently found basepair), minor to 2 (second most frequently found bp), 
 #het to 1 (e.g. K, M, R, S, W, Y), anything else to NA ##
-`recode` <- function(x){
+`recode` <- function(x,pb=NA,prg=NA){
+  if(is.list(pb)){
+    setTxtProgressBar(pb,prg)
+  }
   x <- as.character(x)
   freqs <- names(sort(table(x[x %in% c("A","G","C","T")]),decreasing=TRUE))
   major <- freqs[1]
@@ -287,7 +290,10 @@ lm_eqn = function(df){
 #Looks for AA,GG,CC,TT
 #sets major to 0 (most frequently found basepair), minor to 2 (second most frequently found bp), 
 #het to 1 (e.g. AG, AC, AT, ...), anything else to NA ##
-`recodeBiallele` <- function(x){
+`recodeBiallele` <- function(x,pb=NA,prg=NA){
+  if(is.list(pb)){
+    setTxtProgressBar(pb,prg)
+  }
   x <- as.character(x)
   freqs <- names(sort(table(x[x %in% c("AA","GG","CC","TT")]),decreasing=TRUE))
   major <- freqs[1]
@@ -313,9 +319,9 @@ lm_eqn = function(df){
   require(data.table)
   pb <- txtProgressBar(min=0,max=nrow(genoTable),style=3)
   if(coding=="IUPAC"){
-  genoTable[, {setTxtProgressBar(pb,.GRP);(names(genoTable)) := as.list(recode(.SD))}, by=1:nrow(genoTable)]
+    genoTable[, (names(genoTable)) := as.list(recode(.SD,pb=pb,prg=.GRP)), by=1:nrow(genoTable)]
   }else{
-  genoTable[, {setTxtProgressBar(pb,.GRP);(names(genoTable)) := as.list(recodeBiallele(.SD))}, by=1:nrow(genoTable)]  
+    genoTable[, (names(genoTable)) := as.list(recodeBiallele(.SD,pb=pb,prg=.GRP)), by=1:nrow(genoTable)]  
   }
   close(pb)
   return(genoTable)
