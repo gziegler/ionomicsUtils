@@ -317,6 +317,7 @@ lm_eqn = function(df){
   }else{
   genoTable[, {setTxtProgressBar(pb,.GRP);(names(genoTable)) := as.list(recodeBiallele(.SD))}, by=1:nrow(genoTable)]  
   }
+  close(pb)
   return(genoTable)
 }
 
