@@ -311,11 +311,11 @@ lm_eqn = function(df){
 #Expects rows are SNPs, doesn't have any metadata columns
 `recodeGenoTable` <- function(genoTable,coding="IUPAC"){
   require(data.table)
-  if(coding=="IUPAC"){
   pb <- txtProgressBar(min=0,max=nrow(genoTable),style=3)
+  if(coding=="IUPAC"){
   genoTable[, {setTxtProgressBar(pb,.GRP);(names(genoTable)) := as.list(recode(.SD))}, by=1:nrow(genoTable)]
   }else{
-  genoTable[, (names(genoTable)) := as.list(recodeBiallele(.SD)), by=1:nrow(genoTable)]  
+  genoTable[, {setTxtProgressBar(pb,.GRP);(names(genoTable)) := as.list(recodeBiallele(.SD))}, by=1:nrow(genoTable)]  
   }
   return(genoTable)
 }
