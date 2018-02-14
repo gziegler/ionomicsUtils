@@ -312,7 +312,8 @@ lm_eqn = function(df){
 `recodeGenoTable` <- function(genoTable,coding="IUPAC"){
   require(data.table)
   if(coding=="IUPAC"){
-  genoTable[, (names(genoTable)) := as.list(recode(.SD)), by=1:nrow(genoTable)]
+  pb <- txtProgressBar(min=0,max=nrow(genoTable),style=3)
+  genoTable[, {setTxtProgressBar(pb,.GRP);(names(genoTable)) := as.list(recode(.SD))}, by=1:nrow(genoTable)]
   }else{
   genoTable[, (names(genoTable)) := as.list(recodeBiallele(.SD)), by=1:nrow(genoTable)]  
   }
