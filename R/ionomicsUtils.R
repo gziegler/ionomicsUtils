@@ -317,6 +317,9 @@ lm_eqn = function(df){
 #Expects rows are SNPs, doesn't have any metadata columns
 `recodeGenoTable` <- function(genoTable,coding="IUPAC"){
   require(data.table)
+  if(length(colnames(genoTable)) != length(unique(colnames(genoTable)))){
+    stop("genoTable contains non-unique column names. Column names must be unique for this function to work.")
+  }
   pb <- txtProgressBar(min=0,max=nrow(genoTable),style=3)
   if(coding=="IUPAC"){
     genoTable[, (names(genoTable)) := as.list(recode(.SD,pb=pb,prg=.GRP)), by=1:nrow(genoTable)]
