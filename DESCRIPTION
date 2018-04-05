@@ -4,7 +4,7 @@ Title: Utility functions for ionomics data analysis
 Version: 1.0
 Date: 2017-05-09
 Author: Greg Ziegler
-Maintainer: Who to complain to <gziegler@danforthcenter.org>
+Maintainer: <gziegler@danforthcenter.org>
 Description: Functions for outlier removal, plotting, weight estimation, etc. for ionomics datasets.
 License: GPL-3
 Imports:

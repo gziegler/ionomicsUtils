@@ -371,3 +371,50 @@ lm_eqn = function(df){
 `missingByLine` <- function(genoTable) {
   return(genoTable[,lapply(.SD,function(x) length(which(is.na(x)))/length(x))])
 }
+
+########realizedAB KINSHIP CODE FROM SYNBREED#####
+########Can Handle NAs, sets to 0 after MAF calculations####
+realizedAB <- function(W,maf){
+  NAs <- FALSE
+  if(any(is.na(W))) NAs <- TRUE
+  # W supposed to be coded with 0,1,2
+  n <- nrow(W)
+  p <- ncol(W)
+  #######Looks like synbreed calculated 2*maf originally, so the equation for variance
+  ####is assuming the maf is doubled, mine isn't so
+  ##equation for binomial variance should be
+  ###
+  pq2 <- 2*maf*(1-maf) #the marker variances
+  #pq2 <- .5*maf*(2-maf) #the marker variances, original synbreed
+  W <- sweep(W,2,maf) #subtracts the minor allele frequency
+  W <- sweep(W,2,sqrt(pq2), "/") #divides by sqrt of pq2
+  # compute realized relationship matrix U
+  if(NAs) W[is.na(W)] <- 0
+  U <- tcrossprod(W) / p
+  return(U)
+}
+
+#r function for eigenstrat, don't get a scree plot though
+eigenstrat<-function(geno){                 #snp x ind matrix of genotypes \in 0,1,2
+  nMis<-rowSums(is.na(geno))
+  geno<-geno[nMis==0,]                      #remove snps with missing data
+  avg<-rowSums(geno)/ncol(geno)             # get allele frequency times 2
+  keep<-avg!=0&avg!=2                       # remove sites with non-polymorphic data
+  avg<-avg[keep]
+  geno<-geno[keep,]
+  snp<-nrow(geno)                           #number of snps used in analysis
+  ind<-ncol(geno)                           #number of individuals used in analuysis
+  freq<-avg/2                               #frequency
+  M <- (geno-avg)/sqrt(freq*(1-freq))       #normalize the genotype matrix
+  X<-t(M)%*%M                               #get the (almost) covariance matrix
+  X<-X/(sum(diag(X))/(snp-1))
+  E<-eigen(X)
+  
+  mu<-(sqrt(snp-1)+sqrt(ind))^2/snp         #for testing significance (assuming no LD!)
+  sigma<-(sqrt(snp-1)+sqrt(ind))/snp*(1/sqrt(snp-1)+1/sqrt(ind))^(1/3)
+  E$TW<-(E$values[1]*ind/sum(E$values)-mu)/sigma
+  E$mu<-mu
+  E$sigma<-sigma
+  class(E)<-"eigenstrat"
+  E
+}
