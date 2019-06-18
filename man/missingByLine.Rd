@@ -47,7 +47,4 @@ snp.subset[,colnames(missingByLine[,which(missingByLine>0.2),with=F]) := NULL]
   return(genoTable[,lapply(.SD,function(x) length(which(is.na(x)))/length(x))])
 }
 
-% Add one or more standard keywords, see file 'KEYWORDS' in the
-% R documentation directory.
-\keyword{ ~kwd1 }% use one of  RShowDoc("KEYWORDS")
-\keyword{ ~kwd2 }% __ONLY ONE__ keyword per line
+}

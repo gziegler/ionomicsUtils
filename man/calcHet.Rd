@@ -48,7 +48,4 @@ alleleTable[,discard := (FracHet>=hetThreshold)]
 GenotypeData[which(alleleTable$discard==TRUE)][GenotypeData[which(alleleTable$discard==TRUE)]==1] <- NA
 alleleTable[, discard := NULL]
 
-% Add one or more standard keywords, see file 'KEYWORDS' in the
-% R documentation directory.
-\keyword{ ~kwd1 }% use one of  RShowDoc("KEYWORDS")
-\keyword{ ~kwd2 }% __ONLY ONE__ keyword per line
+}

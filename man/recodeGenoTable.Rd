@@ -51,5 +51,4 @@ function(genoTable){
   genoTable[, (names(genoTable)) := as.list(recode(.SD)), by=1:nrow(genoTable)]
   return(genoTable)
 }
-% Add one or more standard keywords, see file 'KEYWORDS' in the
-% R documentation directory.
+}

@@ -55,7 +55,4 @@ structData <- e$vectors[,1:10]
 rownames(structData) <- colnames(genotype)
 varExplained <- e$values[1:10]/sum(e$values)
 
-% Add one or more standard keywords, see file 'KEYWORDS' in the
-% R documentation directory.
-\keyword{ ~kwd1 }% use one of  RShowDoc("KEYWORDS")
-\keyword{ ~kwd2 }% __ONLY ONE__ keyword per line
+}
